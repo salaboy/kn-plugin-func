@@ -37,8 +37,8 @@ func TestHandle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if output != "echo "+input {
-		t.Errorf("The expected output should be: 'echo hello and it was: %v", output)
+	if output != input {
+		t.Errorf("The expected output should be: %v and it was: %v", output, output)
 	}
 
 }

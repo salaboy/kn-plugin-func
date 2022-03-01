@@ -27,7 +27,6 @@ func Handle(ctx context.Context, event cloudevents.Event) (*event.Event, error) 
 		return nil, err
 	}
 
-	payload = "echo " + payload
 	outputEvent := cloudevents.NewEvent()
 	outputEvent.SetSource("http://example.com/echo")
 	outputEvent.SetType("Echo")
