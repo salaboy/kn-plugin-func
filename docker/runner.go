@@ -60,7 +60,7 @@ func (n *Runner) Run(ctx context.Context, f fn.Function) (job *fn.Job, err error
 		runtimeErrCh = make(chan error, 10)
 	)
 
-	if f.Image == "" {
+	if f.Runtime.Image == "" {
 		return job, errors.New("Function has no associated image. Has it been built?")
 	}
 	if c, _, err = NewClient(client.DefaultDockerHost); err != nil {
@@ -184,7 +184,7 @@ func newContainerConfig(f fn.Function, _ string, verbose bool) (c container.Conf
 	// httpPort := nat.Port(fmt.Sprintf("%v/tcp", port))
 	httpPort := nat.Port("8080/tcp")
 	c = container.Config{
-		Image:        f.Image,
+		Image:        f.Runtime.Image,
 		Tty:          false,
 		AttachStderr: true,
 		AttachStdout: true,
@@ -195,7 +195,7 @@ func newContainerConfig(f fn.Function, _ string, verbose bool) (c container.Conf
 	// Environment Variables
 	// Interpolate references to local environment variables and convert to a
 	// simple string slice for use with container.Config
-	envs, err := fn.Interpolate(f.Envs)
+	envs, err := fn.Interpolate(f.Runtime.Envs)
 	if err != nil {
 		return
 	}

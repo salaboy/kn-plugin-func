@@ -186,8 +186,8 @@ func functionWithOverrides(root string, overrides functionOverrides) (f fn.Funct
 		src  string
 		dest *string
 	}{
-		{overrides.Image, &f.Image},
-		{overrides.Namespace, &f.Namespace},
+		{overrides.Image, &f.Runtime.Image},
+		{overrides.Namespace, &f.Runtime.Namespace},
 	}
 
 	for _, m := range overrideMapping {
@@ -269,8 +269,8 @@ func deriveImage(explicitImage, defaultRegistry, path string) string {
 	if err != nil {
 		return "" // unable to derive due to load error (uninitialized?)
 	}
-	if f.Image != "" {
-		return f.Image // use value previously provided or derived.
+	if f.Runtime.Image != "" {
+		return f.Runtime.Image // use value previously provided or derived.
 	}
 	derivedValue, _ := fn.DerivedImage(path, defaultRegistry)
 	return derivedValue // Use the func system's derivation logic.

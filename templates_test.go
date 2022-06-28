@@ -107,7 +107,7 @@ func TestTemplates_Embedded(t *testing.T) {
 	// write out a template
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  TestRuntime,
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: TestRuntime},
 		Template: "http",
 	})
 	if err != nil {
@@ -140,7 +140,7 @@ func TestTemplates_Custom(t *testing.T) {
 	// the custom provider's directory in the on-disk template repo.
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "customRuntime",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "customRuntime"},
 		Template: "customTemplateRepo/customTemplate",
 	})
 	if err != nil {
@@ -175,7 +175,7 @@ func TestTemplates_Remote(t *testing.T) {
 	// that from the specified url (git repo)
 	err = client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "go",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "go"},
 		Template: "remote",
 	})
 	if err != nil {
@@ -200,7 +200,7 @@ func TestTemplates_Default(t *testing.T) {
 
 	// The runtime is specified, and explicitly includes a
 	// file for the default template of fn.DefaultTemplate
-	err := client.Create(fn.Function{Root: root, Runtime: TestRuntime})
+	err := client.Create(fn.Function{Root: root, Runtime: fn.FunctionRuntimeSpec{Runtime: TestRuntime}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +227,7 @@ func TestTemplates_InvalidErrors(t *testing.T) {
 	// Test for error writing an invalid runtime
 	err = client.Create(fn.Function{
 		Root:    root,
-		Runtime: "invalid",
+		Runtime: fn.FunctionRuntimeSpec{Runtime: "invalid"},
 	})
 	if !errors.Is(err, fn.ErrRuntimeNotFound) {
 		t.Fatalf("Expected ErrRuntimeNotFound, got %v", err)
@@ -237,7 +237,7 @@ func TestTemplates_InvalidErrors(t *testing.T) {
 	// Test for error writing an invalid template
 	err = client.Create(fn.Function{
 		Root:     root,
-		Runtime:  TestRuntime,
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: TestRuntime},
 		Template: "invalid",
 	})
 	if !errors.Is(err, fn.ErrTemplateNotFound) {
@@ -263,7 +263,7 @@ func TestTemplates_ModeEmbedded(t *testing.T) {
 	// needs to be executable (only such is mvnw in quarkus)
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "quarkus",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "quarkus"},
 		Template: "http",
 	})
 	if err != nil {
@@ -298,7 +298,7 @@ func TestTemplates_ModeCustom(t *testing.T) {
 	// Write executable from custom repo
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "test",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "test"},
 		Template: "customTemplateRepo/tplb",
 	})
 	if err != nil {
@@ -337,7 +337,7 @@ func TestTemplates_ModeRemote(t *testing.T) {
 	// Write executable from custom repo
 	err = client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "node",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "node"},
 		Template: "remote",
 	})
 	if err != nil {
@@ -380,7 +380,7 @@ func TestTemplates_RuntimeManifestBuildEnvs(t *testing.T) {
 	// write out a template
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "manifestedRuntime",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "manifestedRuntime"},
 		Template: "customLanguagePackRepo/customTemplate",
 	})
 	if err != nil {
@@ -407,7 +407,7 @@ func TestTemplates_RuntimeManifestBuildEnvs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(envs, f.BuildEnvs); diff != "" {
+	if diff := cmp.Diff(envs, f.Build.BuildEnvs); diff != "" {
 		t.Fatalf("Unexpected difference between runtime's manifest.yaml buildEnvs and Function BuildEnvs (-want, +got): %v", diff)
 	}
 }
@@ -427,7 +427,7 @@ func TestTemplates_ManifestBuildEnvs(t *testing.T) {
 	// write out a template
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "manifestedRuntime",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "manifestedRuntime"},
 		Template: "customLanguagePackRepo/manifestedTemplate",
 	})
 	if err != nil {
@@ -454,7 +454,7 @@ func TestTemplates_ManifestBuildEnvs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(envs, f.BuildEnvs); diff != "" {
+	if diff := cmp.Diff(envs, f.Build.BuildEnvs); diff != "" {
 		t.Fatalf("Unexpected difference between template's manifest.yaml buildEnvs and Function BuildEnvs (-want, +got): %v", diff)
 	}
 }
@@ -474,7 +474,7 @@ func TestTemplates_RepositoryManifestBuildEnvs(t *testing.T) {
 	// write out a template
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "customRuntime",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "customRuntime"},
 		Template: "customLanguagePackRepo/customTemplate",
 	})
 	if err != nil {
@@ -501,7 +501,7 @@ func TestTemplates_RepositoryManifestBuildEnvs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(envs, f.BuildEnvs); diff != "" {
+	if diff := cmp.Diff(envs, f.Build.BuildEnvs); diff != "" {
 		t.Fatalf("Unexpected difference between repository's manifest.yaml buildEnvs and Function BuildEnvs (-want, +got): %v", diff)
 	}
 }
@@ -518,7 +518,7 @@ func TestTemplates_ManifestInvocationHints(t *testing.T) {
 
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "manifestedRuntime",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "manifestedRuntime"},
 		Template: "customLanguagePackRepo/manifestedTemplate",
 	})
 	if err != nil {
@@ -550,7 +550,7 @@ func TestTemplates_ManifestRemoved(t *testing.T) {
 	// write out a template
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "manifestedRuntime",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "manifestedRuntime"},
 		Template: "customLanguagePackRepo/manifestedTemplate",
 	})
 	if err != nil {
@@ -585,7 +585,7 @@ func TestTemplates_InvocationDefault(t *testing.T) {
 	// include manifests as it exemplifies an entirely default template repo.
 	err := client.Create(fn.Function{
 		Root:     root,
-		Runtime:  "customRuntime",
+		Runtime:  fn.FunctionRuntimeSpec{Runtime: "customRuntime"},
 		Template: "customTemplateRepo/customTemplate",
 	})
 	if err != nil {

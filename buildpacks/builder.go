@@ -92,16 +92,16 @@ func (b *Builder) Build(ctx context.Context, f fn.Function) (err error) {
 	// Pack build options
 	opts := pack.BuildOptions{
 		AppPath:        f.Root,
-		Image:          f.Image,
+		Image:          f.Runtime.Image,
 		LifecycleImage: "quay.io/boson/lifecycle:0.13.2",
 		Builder:        image,
-		Buildpacks:     f.Buildpacks,
+		Buildpacks:     f.Build.Buildpacks,
 		ContainerConfig: struct {
 			Network string
 			Volumes []string
 		}{Network: "", Volumes: nil},
 	}
-	if opts.Env, err = fn.Interpolate(f.BuildEnvs); err != nil {
+	if opts.Env, err = fn.Interpolate(f.Build.BuildEnvs); err != nil {
 		return err
 	}
 	if runtime.GOOS == "linux" {
@@ -178,21 +178,21 @@ func newImpl(ctx context.Context, cli client.CommonAPIClient, dockerHost string,
 // package's buildpacks.Builder.Build.  Instead, they must transmit information
 // to the cluster using a Pipeline definition.
 func BuilderImage(f fn.Function) (string, error) {
-	if f.Runtime == "" {
+	if f.Runtime.Runtime == "" {
 		return "", ErrRuntimeRequired{}
 	}
 
-	v, ok := f.BuilderImages["pack"]
+	v, ok := f.Build.BuilderImages["pack"]
 	if ok {
 		return v, nil
 	}
 
-	v, ok = DefaultBuilderImages[f.Runtime]
+	v, ok = DefaultBuilderImages[f.Runtime.Runtime]
 	if ok {
 		return v, nil
 	}
 
-	return "", ErrRuntimeNotSupported{f.Runtime}
+	return "", ErrRuntimeNotSupported{f.Runtime.Runtime}
 }
 
 // podmanPreV330 returns if the daemon is podman pre v330 or errors trying.

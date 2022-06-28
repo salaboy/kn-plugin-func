@@ -21,7 +21,7 @@ func TestFunction_WriteIdempotency(t *testing.T) {
 
 	// Create a function
 	f := fn.Function{
-		Runtime: TestRuntime,
+		Runtime: fn.FunctionRuntimeSpec{Runtime: TestRuntime},
 		Root:    root,
 	}
 	if err := client.Create(f); err != nil {
@@ -63,7 +63,7 @@ func TestFunction_NameDefault(t *testing.T) {
 	// Create the Function at the path
 	client := fn.New(fn.WithRegistry(TestRegistry))
 	f = fn.Function{
-		Runtime: TestRuntime,
+		Runtime: fn.FunctionRuntimeSpec{Runtime: TestRuntime},
 		Root:    root,
 	}
 	if err := client.Create(f); err != nil {

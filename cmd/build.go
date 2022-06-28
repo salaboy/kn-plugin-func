@@ -119,7 +119,7 @@ func runBuild(cmd *cobra.Command, _ []string, newClient ClientFactory) (err erro
 	}
 
 	// If the Function does not yet have an image name and one was not provided on the command line
-	if function.Image == "" {
+	if function.Runtime.Image == "" {
 		//  AND a --registry was not provided, then we need to
 		// prompt for a registry from which we can derive an image name.
 		if config.Registry == "" {
@@ -139,7 +139,7 @@ func runBuild(cmd *cobra.Command, _ []string, newClient ClientFactory) (err erro
 
 		// We have the registry, so let's use it to derive the Function image name
 		config.Image = deriveImage(config.Image, config.Registry, config.Path)
-		function.Image = config.Image
+		function.Runtime.Image = config.Image
 	}
 
 	// All set, let's write changes in the config to the disk
@@ -168,7 +168,7 @@ func runBuild(cmd *cobra.Command, _ []string, newClient ClientFactory) (err erro
 
 	// Use the user-provided builder image, if supplied
 	if config.BuilderImage != "" {
-		function.BuilderImages[config.Builder] = config.BuilderImage
+		function.Build.BuilderImages[config.Builder] = config.BuilderImage
 	}
 
 	// Create a client using the registry defined in config plus any additional

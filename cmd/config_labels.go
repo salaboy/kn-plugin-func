@@ -92,13 +92,13 @@ directory or from the directory specified with --path.
 }
 
 func listLabels(f fn.Function) {
-	if len(f.Labels) == 0 {
+	if len(f.Runtime.Labels) == 0 {
 		fmt.Println("There aren't any configured labels")
 		return
 	}
 
 	fmt.Println("Configured labels:")
-	for _, e := range f.Labels {
+	for _, e := range f.Runtime.Labels {
 		fmt.Println(" - ", e.String())
 	}
 }
@@ -108,9 +108,9 @@ func runAddLabelsPrompt(ctx context.Context, f fn.Function, saver functionSaver)
 	insertToIndex := 0
 
 	// SECTION - if there are some labels already set, choose the position of the new entry
-	if len(f.Labels) > 0 {
+	if len(f.Runtime.Labels) > 0 {
 		options := []string{}
-		for _, e := range f.Labels {
+		for _, e := range f.Runtime.Labels {
 			options = append(options, fmt.Sprintf("Insert before:  %s", e.String()))
 		}
 		options = append(options, "Insert here.")
@@ -233,11 +233,11 @@ func runAddLabelsPrompt(ctx context.Context, f fn.Function, saver functionSaver)
 	}
 
 	// we have all necessary information -> let's insert the label to the selected position in the list
-	if insertToIndex == len(f.Labels) {
-		f.Labels = append(f.Labels, newPair)
+	if insertToIndex == len(f.Runtime.Labels) {
+		f.Runtime.Labels = append(f.Runtime.Labels, newPair)
 	} else {
-		f.Labels = append(f.Labels[:insertToIndex+1], f.Labels[insertToIndex:]...)
-		f.Labels[insertToIndex] = newPair
+		f.Runtime.Labels = append(f.Runtime.Labels[:insertToIndex+1], f.Runtime.Labels[insertToIndex:]...)
+		f.Runtime.Labels[insertToIndex] = newPair
 	}
 
 	err = saver.Save(f)
@@ -249,13 +249,13 @@ func runAddLabelsPrompt(ctx context.Context, f fn.Function, saver functionSaver)
 }
 
 func runRemoveLabelsPrompt(f fn.Function, saver functionSaver) (err error) {
-	if len(f.Labels) == 0 {
+	if len(f.Runtime.Labels) == 0 {
 		fmt.Println("There aren't any configured labels")
 		return
 	}
 
 	options := []string{}
-	for _, e := range f.Labels {
+	for _, e := range f.Runtime.Labels {
 		options = append(options, e.String())
 	}
 
@@ -274,16 +274,16 @@ func runRemoveLabelsPrompt(f fn.Function, saver functionSaver) (err error) {
 
 	var newLabels []fn.Label
 	removed := false
-	for i, e := range f.Labels {
+	for i, e := range f.Runtime.Labels {
 		if e.String() == selectedLabel {
-			newLabels = append(f.Labels[:i], f.Labels[i+1:]...)
+			newLabels = append(f.Runtime.Labels[:i], f.Runtime.Labels[i+1:]...)
 			removed = true
 			break
 		}
 	}
 
 	if removed {
-		f.Labels = newLabels
+		f.Runtime.Labels = newLabels
 		err = saver.Save(f)
 		if err == nil {
 			fmt.Println("Label was removed from the function configuration")

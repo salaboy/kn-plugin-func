@@ -25,7 +25,7 @@ func Test_ErrRuntimeRequired(t *testing.T) {
 // runtime is not yet supported yields an ErrRuntimeNotSupported
 func Test_ErrRuntimeNotSupported(t *testing.T) {
 	b := NewBuilder()
-	err := b.Build(context.Background(), fn.Function{Runtime: "unsupported"})
+	err := b.Build(context.Background(), fn.Function{Runtime: fn.FunctionRuntimeSpec{Runtime: "unsupported"}})
 
 	if !errors.As(err, &ErrRuntimeNotSupported{}) {
 		t.Fatalf("expected ErrRuntimeNotSupported not received. got %v", err)
@@ -38,7 +38,7 @@ func Test_ImageDefault(t *testing.T) {
 	var (
 		i = &mockImpl{}
 		b = NewBuilder(WithImpl(i))
-		f = fn.Function{Runtime: "node"}
+		f = fn.Function{Runtime: fn.FunctionRuntimeSpec{Runtime: "node"}}
 	)
 
 	i.BuildFn = func(ctx context.Context, opts pack.BuildOptions) error {
@@ -62,15 +62,17 @@ func Test_BuilderImageConfigurable(t *testing.T) {
 		i = &mockImpl{}             // mock underlying implementation
 		b = NewBuilder(WithImpl(i)) // Func Builder logic
 		f = fn.Function{            // Function with a builder image set
-			Runtime: "node",
-			BuilderImages: map[string]string{
-				"pack": "example.com/user/builder-image",
+			Runtime: fn.FunctionRuntimeSpec{Runtime: "node"},
+			Build: fn.FunctionBuildSpec{
+				BuilderImages: map[string]string{
+					"pack": "example.com/user/builder-image",
+				},
 			},
 		}
 	)
 
 	i.BuildFn = func(ctx context.Context, opts pack.BuildOptions) error {
-		expected := f.BuilderImages["pack"]
+		expected := f.Build.BuilderImages["pack"]
 		if opts.Builder != expected {
 			t.Fatalf("expected builder image for node to be '%v', got '%v'", expected, opts.Builder)
 		}
@@ -90,8 +92,8 @@ func Test_BuildEnvs(t *testing.T) {
 		envName  = "NAME"
 		envValue = "{{ env:INTERPOLATE_ME }}"
 		f        = fn.Function{
-			Runtime:   "node",
-			BuildEnvs: []fn.Env{{Name: &envName, Value: &envValue}},
+			Runtime: fn.FunctionRuntimeSpec{Runtime: "node"},
+			Build:   fn.FunctionBuildSpec{BuildEnvs: []fn.Env{{Name: &envName, Value: &envValue}}},
 		}
 		i = &mockImpl{}
 		b = NewBuilder(WithImpl(i))

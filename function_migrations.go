@@ -110,7 +110,7 @@ func migrateToCreationStamp(f Function, m migration) (Function, error) {
 	// Yes, it's a little gnarly, but bootstrapping into the lovelieness of a
 	// versioned/migrated system takes cleaning up the trash.
 	if f.Created.IsZero() { // If there is no create stamp
-		if f.Name != "" && f.Runtime != "" { // and it appears to be an old Function
+		if f.Name != "" && f.Runtime.Runtime != "" { // and it appears to be an old Function
 			f.Created = time.Now() // Migrate it to having a timestamp.
 		}
 	}
@@ -170,10 +170,10 @@ func migrateToBuilderImages(f1 Function, m migration) (Function, error) {
 	// If the old Function had defined something custom
 	if f0.Builder != "" && f0.Builder != defaultPackBuilderImage {
 		// carry it forward as the new pack builder image
-		if f1.BuilderImages == nil {
-			f1.BuilderImages = make(map[string]string)
+		if f1.Build.BuilderImages == nil {
+			f1.Build.BuilderImages = make(map[string]string)
 		}
-		f1.BuilderImages["pack"] = f0.Builder
+		f1.Build.BuilderImages["pack"] = f0.Builder
 	}
 
 	// Flag f1 as having had the migration applied

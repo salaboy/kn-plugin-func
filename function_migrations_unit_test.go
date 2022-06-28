@@ -114,7 +114,7 @@ func TestMigrateToBuilderImagesCustom(t *testing.T) {
 	if err != nil {
 		t.Fatal(f)
 	}
-	i, ok := f.BuilderImages["pack"]
+	i, ok := f.Build.BuilderImages["pack"]
 	if !ok {
 		t.Fatal("migrated Function does not include the pack builder images")
 	}

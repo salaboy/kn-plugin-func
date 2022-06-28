@@ -101,7 +101,7 @@ func (pp *PipelinesProvider) Run(ctx context.Context, f fn.Function) error {
 		}
 	}
 
-	registry, err := docker.GetRegistry(f.Image)
+	registry, err := docker.GetRegistry(f.Runtime.Image)
 	if err != nil {
 		return err
 	}

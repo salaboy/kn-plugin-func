@@ -627,7 +627,7 @@ func (c *Client) Build(ctx context.Context, path string) (err error) {
 	}
 
 	// Derive Image from the path (precedence is given to extant config)
-	if f.Image, err = DerivedImage(path, c.registry); err != nil {
+	if f.Runtime.Image, err = DerivedImage(path, c.registry); err != nil {
 		return
 	}
 
@@ -648,9 +648,9 @@ func (c *Client) Build(ctx context.Context, path string) (err error) {
 
 	// TODO: create a status structure and return it here for optional
 	// use by the cli for user echo (rather than rely on verbose mode here)
-	message := fmt.Sprintf("🙌 Function image built: %v", f.Image)
+	message := fmt.Sprintf("🙌 Function image built: %v", f.Runtime.Image)
 	if runtime.GOOS == "windows" {
-		message = fmt.Sprintf("Function image built: %v", f.Image)
+		message = fmt.Sprintf("Function image built: %v", f.Runtime.Image)
 	}
 	c.progressListener.Increment(message)
 	return
@@ -726,7 +726,7 @@ func (c *Client) RunPipeline(ctx context.Context, path string, git Git) (err err
 		err = fmt.Errorf("failed to laod function: %w", err)
 		return
 	}
-	f.Git = git
+	f.Build.Git = git
 
 	// Build and deploy function using Pipeline
 	err = c.pipelinesProvider.Run(ctx, f)
@@ -904,7 +904,7 @@ func (c *Client) Push(ctx context.Context, path string) (err error) {
 	}
 
 	// Record the Image Digest pushed.
-	f.ImageDigest = imageDigest
+	f.Runtime.ImageDigest = imageDigest
 	return f.Write()
 }
 

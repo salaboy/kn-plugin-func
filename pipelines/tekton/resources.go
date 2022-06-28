@@ -38,7 +38,7 @@ func generatePipeline(f fn.Function, labels map[string]string) *pplnv1beta1.Pipe
 		{
 			Name:        "gitRepository",
 			Description: "Git repository that hosts the function project",
-			Default:     pplnv1beta1.NewArrayOrString(*f.Git.URL),
+			Default:     pplnv1beta1.NewArrayOrString(*f.Build.Git.URL),
 		},
 		{
 			Name:        "gitRevision",
@@ -87,12 +87,12 @@ func generatePipeline(f fn.Function, labels map[string]string) *pplnv1beta1.Pipe
 func generatePipelineRun(f fn.Function, labels map[string]string) *pplnv1beta1.PipelineRun {
 
 	revision := ""
-	if f.Git.Revision != nil {
-		revision = *f.Git.Revision
+	if f.Build.Git.Revision != nil {
+		revision = *f.Build.Git.Revision
 	}
 	contextDir := ""
-	if f.Git.ContextDir != nil {
-		contextDir = *f.Git.ContextDir
+	if f.Build.Git.ContextDir != nil {
+		contextDir = *f.Build.Git.ContextDir
 	}
 
 	return &pplnv1beta1.PipelineRun{
@@ -109,7 +109,7 @@ func generatePipelineRun(f fn.Function, labels map[string]string) *pplnv1beta1.P
 			Params: []pplnv1beta1.Param{
 				{
 					Name:  "gitRepository",
-					Value: *pplnv1beta1.NewArrayOrString(*f.Git.URL),
+					Value: *pplnv1beta1.NewArrayOrString(*f.Build.Git.URL),
 				},
 				{
 					Name:  "gitRevision",
@@ -121,7 +121,7 @@ func generatePipelineRun(f fn.Function, labels map[string]string) *pplnv1beta1.P
 				},
 				{
 					Name:  "imageName",
-					Value: *pplnv1beta1.NewArrayOrString(f.Image),
+					Value: *pplnv1beta1.NewArrayOrString(f.Runtime.Image),
 				},
 				{
 					Name:  "builderImage",
@@ -165,7 +165,7 @@ func getBuilderImage(f fn.Function) (name string) {
 }
 
 func getPipelineName(f fn.Function) string {
-	return fmt.Sprintf("%s-%s-pipeline", f.Name, f.BuildType)
+	return fmt.Sprintf("%s-%s-pipeline", f.Name, f.Build.BuildType)
 }
 
 func getPipelineSecretName(f fn.Function) string {

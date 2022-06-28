@@ -177,12 +177,12 @@ func (d *Deployer) Deploy(ctx context.Context, f fn.Function) (result fn.Deploym
 		referencedSecrets := sets.NewString()
 		referencedConfigMaps := sets.NewString()
 
-		newEnv, newEnvFrom, err := processEnvs(f.Envs, &referencedSecrets, &referencedConfigMaps)
+		newEnv, newEnvFrom, err := processEnvs(f.Runtime.Envs, &referencedSecrets, &referencedConfigMaps)
 		if err != nil {
 			return fn.DeploymentResult{}, err
 		}
 
-		newVolumes, newVolumeMounts, err := processVolumes(f.Volumes, &referencedSecrets, &referencedConfigMaps)
+		newVolumes, newVolumeMounts, err := processVolumes(f.Runtime.Volumes, &referencedSecrets, &referencedConfigMaps)
 		if err != nil {
 			return fn.DeploymentResult{}, err
 		}
@@ -228,11 +228,11 @@ func setHealthEndpoints(f fn.Function, c *corev1.Container) *corev1.Container {
 	c.ReadinessProbe = probeFor(READINESS_ENDPOINT)
 
 	// If specified in func.yaml, the provided values override the defaults
-	if f.HealthEndpoints.Liveness != "" {
-		c.LivenessProbe = probeFor(f.HealthEndpoints.Liveness)
+	if f.Runtime.HealthEndpoints.Liveness != "" {
+		c.LivenessProbe = probeFor(f.Runtime.HealthEndpoints.Liveness)
 	}
-	if f.HealthEndpoints.Readiness != "" {
-		c.ReadinessProbe = probeFor(f.HealthEndpoints.Readiness)
+	if f.Runtime.HealthEndpoints.Readiness != "" {
+		c.ReadinessProbe = probeFor(f.Runtime.HealthEndpoints.Readiness)
 	}
 	return c
 }
@@ -246,14 +246,14 @@ func generateNewService(f fn.Function) (*v1.Service, error) {
 	referencedSecrets := sets.NewString()
 	referencedConfigMaps := sets.NewString()
 
-	newEnv, newEnvFrom, err := processEnvs(f.Envs, &referencedSecrets, &referencedConfigMaps)
+	newEnv, newEnvFrom, err := processEnvs(f.Runtime.Envs, &referencedSecrets, &referencedConfigMaps)
 	if err != nil {
 		return nil, err
 	}
 	container.Env = newEnv
 	container.EnvFrom = newEnvFrom
 
-	newVolumes, newVolumeMounts, err := processVolumes(f.Volumes, &referencedSecrets, &referencedConfigMaps)
+	newVolumes, newVolumeMounts, err := processVolumes(f.Runtime.Volumes, &referencedSecrets, &referencedConfigMaps)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +268,7 @@ func generateNewService(f fn.Function) (*v1.Service, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        f.Name,
 			Labels:      labels,
-			Annotations: f.Annotations,
+			Annotations: f.Runtime.Annotations,
 		},
 		Spec: v1.ServiceSpec{
 			ConfigurationSpec: v1.ConfigurationSpec{
@@ -286,7 +286,7 @@ func generateNewService(f fn.Function) (*v1.Service, error) {
 		},
 	}
 
-	err = setServiceOptions(&service.Spec.Template, f.Options)
+	err = setServiceOptions(&service.Spec.Template, f.Runtime.Options)
 	if err != nil {
 		return service, err
 	}
@@ -302,7 +302,7 @@ func updateService(f fn.Function, newEnv []corev1.EnvVar, newEnvFrom []corev1.En
 
 		// Don't bother being as clever as we are with env variables
 		// Just set the annotations and labels to be whatever we find in func.yaml
-		for k, v := range f.Annotations {
+		for k, v := range f.Runtime.Annotations {
 			service.ObjectMeta.Annotations[k] = v
 		}
 		// I hate that we have to do this. Users should not see these values.
@@ -320,7 +320,7 @@ func updateService(f fn.Function, newEnv []corev1.EnvVar, newEnvFrom []corev1.En
 		cp := &service.Spec.Template.Spec.Containers[0]
 		setHealthEndpoints(f, cp)
 
-		err := setServiceOptions(&service.Spec.Template, f.Options)
+		err := setServiceOptions(&service.Spec.Template, f.Runtime.Options)
 		if err != nil {
 			return service, err
 		}
@@ -355,14 +355,14 @@ func processLabels(f fn.Function) (map[string]string, error) {
 	labels := map[string]string{
 		labels.FunctionKey:        labels.FunctionValue,
 		labels.FunctionNameKey:    f.Name,
-		labels.FunctionRuntimeKey: f.Runtime,
+		labels.FunctionRuntimeKey: f.Runtime.Runtime,
 
 		// --- handle usage of deprecated labels (`boson.dev/function`, `boson.dev/runtime`)
 		labels.DeprecatedFunctionKey:        labels.FunctionValue,
-		labels.DeprecatedFunctionRuntimeKey: f.Runtime,
+		labels.DeprecatedFunctionRuntimeKey: f.Runtime.Runtime,
 		// --- end of handling usage of deprecated runtime labels
 	}
-	for _, label := range f.Labels {
+	for _, label := range f.Runtime.Labels {
 		if label.Key != nil && label.Value != nil {
 			if strings.HasPrefix(*label.Value, "{{") {
 				slices := strings.Split(strings.Trim(*label.Value, "{} "), ":")

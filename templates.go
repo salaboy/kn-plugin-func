@@ -101,7 +101,7 @@ func (t *Templates) Write(f *Function) error {
 	}
 
 	// The Function's Template
-	template, err := t.Get(f.Runtime, f.Template)
+	template, err := t.Get(f.Runtime.Runtime, f.Template)
 	if err != nil {
 		return err
 	}

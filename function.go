@@ -16,31 +16,42 @@ import (
 // FunctionFile is the file used for the serialized form of a Function.
 const FunctionFile = "func.yaml"
 
-type Function struct {
-	// Version at which this function is known to be compatible.
-	// More specifically, it is the highest migration which has been applied.
-	// For details see the .Migrated() and .Migrate() methods.
-	Version string `yaml:"version"` // semver format
+// FunctionBuildSpec
+type FunctionBuildSpec struct {
+	// BuildType represents the specified way of building the fuction
+	// ie. "local" or "git"
+	BuildType string `json:"build" jsonschema:"enum=local,enum=git"`
 
-	// Root on disk at which to find/create source and config files.
-	Root string `yaml:"-"`
+	// Git stores information about remote git repository,
+	// in case build type "git" is being used
+	Git Git `json:"git"`
 
-	// Name of the Function.  If not provided, path derivation is attempted when
-	// requried (such as for initialization).
-	Name string `yaml:"name" jsonschema:"pattern=^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"`
+	// BuilderImages define optional explicit builder images to use by
+	// builder implementations in leau of the in-code defaults.  They key
+	// is the builder's short name.  For example:
+	// builderImages:
+	//   pack: example.com/user/my-pack-node-builder
+	//   s2i: example.com/user/my-s2i-node-builder
+	BuilderImages map[string]string `json:"builderImages,omitempty"`
 
+	// Optional list of buildpacks to use when building the function
+	Buildpacks []string `json:"buildpacks"`
+
+	// Build Env variables to be set
+	BuildEnvs []Env `json:"buildEnvs"`
+}
+
+// FunctionRuntimeSpec
+type FunctionRuntimeSpec struct {
 	// Namespace into which the Function is deployed on supported platforms.
-	Namespace string `yaml:"namespace"`
+	Namespace string `json:"namespace"`
 
-	// Runtime is the language plus context.  nodejs|go|quarkus|rust etc.
-	Runtime string `yaml:"runtime"`
-
-	// Template for the Function.
-	Template string `yaml:"-"`
+	// Runtime is the language plus context.  nodejs|go|quarkus|springboot|rust etc.
+	Runtime string `json:"runtime"`
 
 	// Registry at which to store interstitial containers, in the form
 	// [registry]/[user].
-	Registry string `yaml:"registry"`
+	Registry string `json:"registry"`
 
 	// Optional full OCI image tag in form:
 	//   [registry]/[namespace]/[name]:[tag]
@@ -51,72 +62,72 @@ type Function struct {
 	//   alice/my.function.name
 	// If Image is provided, it overrides the default of concatenating
 	// "Registry+Name:latest" to derive the Image.
-	Image string `yaml:"image"`
+	Image string `json:"image"`
 
 	// SHA256 hash of the latest image that has been built
-	ImageDigest string `yaml:"imageDigest"`
-
-	// BuildType represents the specified way of building the fuction
-	// ie. "local" or "git"
-	BuildType string `yaml:"build" jsonschema:"enum=local,enum=git"`
-
-	// Git stores information about remote git repository,
-	// in case build type "git" is being used
-	Git Git `yaml:"git"`
-
-	// BuilderImages define optional explicit builder images to use by
-	// builder implementations in leau of the in-code defaults.  They key
-	// is the builder's short name.  For example:
-	// builderImages:
-	//   pack: example.com/user/my-pack-node-builder
-	//   s2i: example.com/user/my-s2i-node-builder
-	BuilderImages map[string]string `yaml:"builderImages,omitempty"`
-
-	// Optional list of buildpacks to use when building the function
-	Buildpacks []string `yaml:"buildpacks"`
+	ImageDigest string `json:"imageDigest"`
 
 	// List of volumes to be mounted to the function
-	Volumes []Volume `yaml:"volumes"`
-
-	// Build Env variables to be set
-	BuildEnvs []Env `yaml:"buildEnvs"`
+	Volumes []Volume `json:"volumes"`
 
 	// Env variables to be set
-	Envs []Env `yaml:"envs"`
+	Envs []Env `json:"envs"`
 
 	// Map containing user-supplied annotations
 	// Example: { "division": "finance" }
-	Annotations map[string]string `yaml:"annotations"`
+	Annotations map[string]string `json:"annotations"`
 
 	// Options to be set on deployed function (scaling, etc.)
-	Options Options `yaml:"options"`
+	Options Options `json:"options"`
 
 	// Map of user-supplied labels
-	Labels []Label `yaml:"labels"`
+	Labels []Label `json:"labels"`
 
 	// Health endpoints specified by the language pack
-	HealthEndpoints HealthEndpoints `yaml:"healthEndpoints"`
+	HealthEndpoints HealthEndpoints `json:"healthEndpoints"`
+}
+
+type Function struct {
+	// Version at which this function is known to be compatible.
+	// More specifically, it is the highest migration which has been applied.
+	// For details see the `.Migrated()` and `.Migrate()` methods.
+	Version string `json:"version"` // semver format
+
+	// Root on disk at which to find/create source and config files.
+	Root string `json:"-"`
+
+	// Name of the Function.  If not provided, path derivation is attempted when
+	// required (such as for initialization).
+	Name string `json:"name" jsonschema:"pattern=^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"`
+
+	// Template for the Function.
+	Template string `json:"-"`
 
 	// Created time is the moment that creation was successfully completed
 	// according to the client which is in charge of what constitutes being
 	// fully "Created" (aka initialized)
-	Created time.Time `yaml:"created"`
+	Created time.Time `json:"created"`
 
 	// Invocation defines hints for use when invoking this function.
 	// See Client.Invoke for usage.
-	Invocation Invocation `yaml:"invocation,omitempty"`
+	Invocation Invocation `json:"invocation,omitempty"`
+
+	//FunctionRuntimeSpec define the runtime properties for a function
+	Build FunctionBuildSpec `json:"build"`
+	//FunctionRuntimeSpec define the runtime properties for a function
+	Runtime FunctionRuntimeSpec `json:"run"`
 }
 
 // HealthEndpoints specify the liveness and readiness endpoints for a Runtime
 type HealthEndpoints struct {
-	Liveness  string `yaml:"liveness,omitempty"`
-	Readiness string `yaml:"readiness,omitempty"`
+	Liveness  string `json:"liveness,omitempty"`
+	Readiness string `json:"readiness,omitempty"`
 }
 
 // BuildConfig defines builders and buildpacks
 type BuildConfig struct {
-	Buildpacks    []string          `yaml:"buildpacks,omitempty"`
-	BuilderImages map[string]string `yaml:"builderImages,omitempty"`
+	Buildpacks    []string          `json:"buildpacks,omitempty"`
+	BuilderImages map[string]string `json:"builderImages,omitempty"`
 }
 
 // Invocation defines hints on how to accomplish a Function invocation.
@@ -124,7 +135,7 @@ type Invocation struct {
 	// Format indicates the expected format of the invocation.  Either 'http'
 	// (a basic HTTP POST of standard form fields) or 'cloudevent'
 	// (a CloudEvents v2 formatted http request).
-	Format string `yaml:"format,omitempty"`
+	Format string `json:"format,omitempty"`
 
 	// Protocol Note:
 	// Protocol is currently always HTTP.  Method etc. determined by the single,
@@ -139,8 +150,8 @@ func NewFunctionWith(defaults Function) Function {
 	if defaults.Template == "" {
 		defaults.Template = DefaultTemplate
 	}
-	if defaults.BuildType == "" {
-		defaults.BuildType = DefaultBuildType
+	if defaults.Build.BuildType == "" {
+		defaults.Build.BuildType = DefaultBuildType
 	}
 	return defaults
 }
@@ -179,7 +190,7 @@ func (f Function) Validate() error {
 	if f.Name == "" {
 		return errors.New("function name is required")
 	}
-	if f.Runtime == "" {
+	if f.Runtime.Runtime == "" {
 		return errors.New("function language runtime is required")
 	}
 	if f.Root == "" {
@@ -188,19 +199,19 @@ func (f Function) Validate() error {
 
 	// if build type == git, we need to check that Git options are specified as well
 	mandatoryGitOption := false
-	if f.BuildType == BuildTypeGit {
+	if f.Build.BuildType == BuildTypeGit {
 		mandatoryGitOption = true
 	}
 
 	var ctr int
 	errs := [][]string{
-		validateVolumes(f.Volumes),
-		ValidateBuildEnvs(f.BuildEnvs),
-		ValidateEnvs(f.Envs),
-		validateOptions(f.Options),
-		ValidateLabels(f.Labels),
-		ValidateBuildType(f.BuildType, true, false),
-		validateGit(f.Git, mandatoryGitOption),
+		validateVolumes(f.Runtime.Volumes),
+		ValidateBuildEnvs(f.Build.BuildEnvs),
+		ValidateEnvs(f.Runtime.Envs),
+		validateOptions(f.Runtime.Options),
+		ValidateLabels(f.Runtime.Labels),
+		ValidateBuildType(f.Build.BuildType, true, false),
+		validateGit(f.Build.Git, mandatoryGitOption),
 	}
 
 	var b strings.Builder
@@ -317,7 +328,7 @@ func (f Function) HasImage() bool {
 	// If Image (the override) and ImageDigest (the most recent build stamp) are
 	// both empty, the Function is considered unbuilt.
 	// TODO: upgrade to a "build complete" timestamp.
-	return f.Image != "" || f.ImageDigest != ""
+	return f.Runtime.Image != "" || f.Runtime.ImageDigest != ""
 }
 
 // ImageWithDigest returns the full reference to the image including SHA256 Digest.
@@ -326,18 +337,18 @@ func (f Function) HasImage() bool {
 // git tree on every build.
 func (f Function) ImageWithDigest() string {
 	// Return image, if Digest is empty
-	if f.ImageDigest == "" {
-		return f.Image
+	if f.Runtime.ImageDigest == "" {
+		return f.Runtime.Image
 	}
 
-	lastSlashIdx := strings.LastIndexAny(f.Image, "/")
-	imageAsBytes := []byte(f.Image)
+	lastSlashIdx := strings.LastIndexAny(f.Runtime.Image, "/")
+	imageAsBytes := []byte(f.Runtime.Image)
 
 	part1 := string(imageAsBytes[:lastSlashIdx+1])
 	part2 := string(imageAsBytes[lastSlashIdx+1:])
 
 	// Remove tag from the image name and append SHA256 hash instead
-	return part1 + strings.Split(part2, ":")[0] + "@" + f.ImageDigest
+	return part1 + strings.Split(part2, ":")[0] + "@" + f.Runtime.ImageDigest
 }
 
 // DerivedImage returns the derived image name (OCI container tag) of the
@@ -366,8 +377,8 @@ func DerivedImage(root, registry string) (image string, err error) {
 
 	// If the Function has already had image populated
 	// and a new registry hasn't been provided, use this pre-calculated value.
-	if f.Image != "" && f.Registry == registry {
-		image = f.Image
+	if f.Runtime.Image != "" && f.Runtime.Registry == registry {
+		image = f.Runtime.Image
 		return
 	}
 

@@ -44,6 +44,7 @@ require (
 	knative.dev/networking v0.0.0-20220120045035-ec849677a316 // indirect
 	knative.dev/pkg v0.0.0-20220222214439-083dd97300e1
 	knative.dev/serving v0.29.5
+	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
 replace (

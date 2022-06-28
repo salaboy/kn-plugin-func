@@ -73,7 +73,7 @@ func runInfo(cmd *cobra.Command, args []string, newClient ClientFactory) (err er
 	if err != nil {
 		return
 	}
-	d.Image = function.Image
+	d.Image = function.Runtime.Image
 
 	write(os.Stdout, info(d), config.Output)
 	return

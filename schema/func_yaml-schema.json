@@ -22,22 +22,9 @@
 			"required": [
 				"version",
 				"name",
-				"namespace",
-				"runtime",
-				"registry",
-				"image",
-				"imageDigest",
+				"created",
 				"build",
-				"git",
-				"buildpacks",
-				"volumes",
-				"buildEnvs",
-				"envs",
-				"annotations",
-				"options",
-				"labels",
-				"healthEndpoints",
-				"created"
+				"run"
 			],
 			"properties": {
 				"version": {
@@ -47,21 +34,34 @@
 					"pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
 					"type": "string"
 				},
-				"namespace": {
-					"type": "string"
+				"created": {
+					"type": "string",
+					"format": "date-time"
 				},
-				"runtime": {
-					"type": "string"
+				"invocation": {
+					"$schema": "http://json-schema.org/draft-04/schema#",
+					"$ref": "#/definitions/Invocation"
 				},
-				"registry": {
-					"type": "string"
+				"build": {
+					"$schema": "http://json-schema.org/draft-04/schema#",
+					"$ref": "#/definitions/FunctionBuildSpec"
 				},
-				"image": {
-					"type": "string"
-				},
-				"imageDigest": {
-					"type": "string"
-				},
+				"run": {
+					"$schema": "http://json-schema.org/draft-04/schema#",
+					"$ref": "#/definitions/FunctionRuntimeSpec"
+				}
+			},
+			"additionalProperties": false,
+			"type": "object"
+		},
+		"FunctionBuildSpec": {
+			"required": [
+				"build",
+				"git",
+				"buildpacks",
+				"buildEnvs"
+			],
+			"properties": {
 				"build": {
 					"enum": [
 						"local",
@@ -87,17 +87,51 @@
 					},
 					"type": "array"
 				},
-				"volumes": {
-					"items": {
-						"$schema": "http://json-schema.org/draft-04/schema#",
-						"$ref": "#/definitions/Volume"
-					},
-					"type": "array"
-				},
 				"buildEnvs": {
 					"items": {
 						"$schema": "http://json-schema.org/draft-04/schema#",
 						"$ref": "#/definitions/Env"
+					},
+					"type": "array"
+				}
+			},
+			"additionalProperties": false,
+			"type": "object"
+		},
+		"FunctionRuntimeSpec": {
+			"required": [
+				"namespace",
+				"runtime",
+				"registry",
+				"image",
+				"imageDigest",
+				"volumes",
+				"envs",
+				"annotations",
+				"options",
+				"labels",
+				"healthEndpoints"
+			],
+			"properties": {
+				"namespace": {
+					"type": "string"
+				},
+				"runtime": {
+					"type": "string"
+				},
+				"registry": {
+					"type": "string"
+				},
+				"image": {
+					"type": "string"
+				},
+				"imageDigest": {
+					"type": "string"
+				},
+				"volumes": {
+					"items": {
+						"$schema": "http://json-schema.org/draft-04/schema#",
+						"$ref": "#/definitions/Volume"
 					},
 					"type": "array"
 				},
@@ -129,14 +163,6 @@
 				"healthEndpoints": {
 					"$schema": "http://json-schema.org/draft-04/schema#",
 					"$ref": "#/definitions/HealthEndpoints"
-				},
-				"created": {
-					"type": "string",
-					"format": "date-time"
-				},
-				"invocation": {
-					"$schema": "http://json-schema.org/draft-04/schema#",
-					"$ref": "#/definitions/Invocation"
 				}
 			},
 			"additionalProperties": false,

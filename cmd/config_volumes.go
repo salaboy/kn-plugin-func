@@ -99,24 +99,24 @@ in the current directory or from the directory specified with --path.
 }
 
 func listVolumes(f fn.Function) {
-	if len(f.Volumes) == 0 {
+	if len(f.Runtime.Volumes) == 0 {
 		fmt.Println("There aren't any configured Volume mounts")
 		return
 	}
 
 	fmt.Println("Configured Volumes mounts:")
-	for _, v := range f.Volumes {
+	for _, v := range f.Runtime.Volumes {
 		fmt.Println(" - ", v.String())
 	}
 }
 
 func runAddVolumesPrompt(ctx context.Context, f fn.Function) (err error) {
 
-	secrets, err := k8s.ListSecretsNamesIfConnected(ctx, f.Namespace)
+	secrets, err := k8s.ListSecretsNamesIfConnected(ctx, f.Runtime.Namespace)
 	if err != nil {
 		return
 	}
-	configMaps, err := k8s.ListConfigMapsNamesIfConnected(ctx, f.Namespace)
+	configMaps, err := k8s.ListConfigMapsNamesIfConnected(ctx, f.Runtime.Namespace)
 	if err != nil {
 		return
 	}
@@ -136,7 +136,7 @@ func runAddVolumesPrompt(ctx context.Context, f fn.Function) (err error) {
 
 	switch len(options) {
 	case 0:
-		fmt.Printf("There aren't any Secrets or ConfiMaps in the namespace \"%s\"\n", f.Namespace)
+		fmt.Printf("There aren't any Secrets or ConfiMaps in the namespace \"%s\"\n", f.Runtime.Namespace)
 		return
 	case 1:
 		selectedOption = options[0]
@@ -204,7 +204,7 @@ func runAddVolumesPrompt(ctx context.Context, f fn.Function) (err error) {
 		newVolume.Secret = &selectedResource
 	}
 
-	f.Volumes = append(f.Volumes, newVolume)
+	f.Runtime.Volumes = append(f.Runtime.Volumes, newVolume)
 
 	err = f.Write()
 	if err == nil {
@@ -215,13 +215,13 @@ func runAddVolumesPrompt(ctx context.Context, f fn.Function) (err error) {
 }
 
 func runRemoveVolumesPrompt(f fn.Function) (err error) {
-	if len(f.Volumes) == 0 {
+	if len(f.Runtime.Volumes) == 0 {
 		fmt.Println("There aren't any configured Volume mounts")
 		return
 	}
 
 	options := []string{}
-	for _, v := range f.Volumes {
+	for _, v := range f.Runtime.Volumes {
 		options = append(options, v.String())
 	}
 
@@ -240,16 +240,16 @@ func runRemoveVolumesPrompt(f fn.Function) (err error) {
 
 	var newVolumes []fn.Volume
 	removed := false
-	for i, v := range f.Volumes {
+	for i, v := range f.Runtime.Volumes {
 		if v.String() == selectedVolume {
-			newVolumes = append(f.Volumes[:i], f.Volumes[i+1:]...)
+			newVolumes = append(f.Runtime.Volumes[:i], f.Runtime.Volumes[i+1:]...)
 			removed = true
 			break
 		}
 	}
 
 	if removed {
-		f.Volumes = newVolumes
+		f.Runtime.Volumes = newVolumes
 		err = f.Write()
 		if err == nil {
 			fmt.Println("Volume entry was removed from the function configuration")

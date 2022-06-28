@@ -108,7 +108,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 		return
 	}
 
-	function.Envs, _, err = mergeEnvs(function.Envs, config.EnvToUpdate, config.EnvToRemove)
+	function.Runtime.Envs, _, err = mergeEnvs(function.Runtime.Envs, config.EnvToUpdate, config.EnvToRemove)
 	if err != nil {
 		return
 	}
@@ -122,7 +122,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 			return err
 		}
 	} else {
-		currentBuildType = function.BuildType
+		currentBuildType = function.Build.BuildType
 	}
 
 	// Check if the Function has been initialized
@@ -131,7 +131,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 	}
 
 	// If the Function does not yet have an image name and one was not provided on the command line
-	if function.Image == "" && currentBuildType != "disabled" {
+	if function.Runtime.Image == "" && currentBuildType != "disabled" {
 		//  AND a --registry was not provided, then we need to
 		// prompt for a registry from which we can derive an image name.
 		if config.Registry == "" {
@@ -150,7 +150,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 
 		// We have the registry, so let's use it to derive the Function image name
 		config.Image = deriveImage(config.Image, config.Registry, config.Path)
-		function.Image = config.Image
+		function.Runtime.Image = config.Image
 	}
 
 	// All set, let's write changes in the config to the disk
@@ -161,7 +161,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 
 	// Default config namespace is the function's namespace
 	if config.Namespace == "" {
-		config.Namespace = function.Namespace
+		config.Namespace = function.Runtime.Namespace
 	}
 
 	// if registry was not changed via command line flag meaning it's empty
@@ -184,7 +184,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 
 	// Use the user-provided builder image, if supplied
 	if config.BuilderImage != "" {
-		function.BuilderImages[config.Builder] = config.BuilderImage
+		function.Build.BuilderImages[config.Builder] = config.BuilderImage
 	}
 
 	client, done := newClient(ClientConfig{Namespace: config.Namespace, Verbose: config.Verbose},
@@ -201,7 +201,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 			return err
 		}
 	case fn.BuildTypeGit:
-		git := function.Git
+		git := function.Build.Git
 
 		if config.GitURL != "" {
 			git.URL = &config.GitURL
