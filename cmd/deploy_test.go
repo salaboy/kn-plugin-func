@@ -61,11 +61,12 @@ created: 2009-11-10 23:00:00`,
 			funcFile: `name: test-func
 runtime: go
 created: 2009-11-10 23:00:00
-build: git
-git:
-  url: git@github.com:my-repo/my-function.git
-  revision: master
-  contextDir: pwd`,
+build:
+  type: git
+  git:
+    url: git@github.com:my-repo/my-function.git
+    revision: master
+    contextDir: pwd`,
 			expectCallURL:        pointer.StringPtr("git@github.com:knative-sandbox/kn-plugin-func.git"),
 			expectCallBranch:     pointer.StringPtr("main"),
 			expectCallContextDir: pointer.StringPtr("func"),
@@ -78,11 +79,12 @@ git:
 			funcFile: `name: test-func
 runtime: go
 created: 2009-11-10 23:00:00
-build: git
-git:
-  url: git@github.com:my-repo/my-function.git
-  revision: master
-  contextDir: pwd`,
+build:
+  type: git
+  git:
+    url: git@github.com:my-repo/my-function.git
+    revision: master
+    contextDir: pwd`,
 			expectFileURL:        pointer.StringPtr("git@github.com:my-repo/my-function.git"),
 			expectFileBranch:     pointer.StringPtr("master"),
 			expectFileContextDir: pointer.StringPtr("pwd"),

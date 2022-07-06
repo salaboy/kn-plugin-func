@@ -46,11 +46,11 @@ func (t template) Write(ctx context.Context, f *Function) error {
 	if len(f.Build.BuildEnvs) == 0 {
 		f.Build.BuildEnvs = t.config.BuildEnvs
 	}
-	if f.Runtime.HealthEndpoints.Liveness == "" {
-		f.Runtime.HealthEndpoints.Liveness = t.config.HealthEndpoints.Liveness
+	if f.Run.HealthEndpoints.Liveness == "" {
+		f.Run.HealthEndpoints.Liveness = t.config.HealthEndpoints.Liveness
 	}
-	if f.Runtime.HealthEndpoints.Readiness == "" {
-		f.Runtime.HealthEndpoints.Readiness = t.config.HealthEndpoints.Readiness
+	if f.Run.HealthEndpoints.Readiness == "" {
+		f.Run.HealthEndpoints.Readiness = t.config.HealthEndpoints.Readiness
 	}
 	if f.Invocation.Format == "" {
 		f.Invocation.Format = t.config.Invocation.Format

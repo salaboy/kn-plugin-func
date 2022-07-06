@@ -123,11 +123,11 @@ func (n *Pusher) Push(ctx context.Context, f fn.Function) (digest string, err er
 		output = io.Discard
 	}
 
-	if f.Runtime.Image == "" {
+	if f.Image == "" {
 		return "", errors.New("Function has no associated image.  Has it been built?")
 	}
 
-	registry, err := GetRegistry(f.Runtime.Image)
+	registry, err := GetRegistry(f.Image)
 	if err != nil {
 		return "", err
 	}
@@ -167,7 +167,7 @@ func (n *Pusher) daemonPush(ctx context.Context, f fn.Function, credentials Cred
 
 	opts := types.ImagePushOptions{RegistryAuth: base64.StdEncoding.EncodeToString(b)}
 
-	r, err := cli.ImagePush(ctx, f.Runtime.Image, opts)
+	r, err := cli.ImagePush(ctx, f.Image, opts)
 	if err != nil {
 		return "", fmt.Errorf("failed to push the image: %w", err)
 	}
@@ -243,7 +243,7 @@ func (n *Pusher) push(ctx context.Context, f fn.Function, credentials Credential
 		Password: credentials.Password,
 	}
 
-	ref, err := name.ParseReference(f.Runtime.Image)
+	ref, err := name.ParseReference(f.Image)
 	if err != nil {
 		return "", err
 	}

@@ -14,7 +14,7 @@ import (
 func Test_setHealthEndpoints(t *testing.T) {
 	f := fn.Function{
 		Name: "testing",
-		Runtime: fn.FunctionRuntimeSpec{
+		Run: fn.RunSpec{
 			HealthEndpoints: fn.HealthEndpoints{
 				Liveness:  "/lively",
 				Readiness: "/readyAsIllEverBe",

@@ -121,7 +121,7 @@ func generatePipelineRun(f fn.Function, labels map[string]string) *pplnv1beta1.P
 				},
 				{
 					Name:  "imageName",
-					Value: *pplnv1beta1.NewArrayOrString(f.Runtime.Image),
+					Value: *pplnv1beta1.NewArrayOrString(f.Image),
 				},
 				{
 					Name:  "builderImage",

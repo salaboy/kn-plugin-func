@@ -38,10 +38,8 @@ func TestFunction_ImageWithDigest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := Function{
-				Runtime: FunctionRuntimeSpec{
-					Image:       tt.fields.Image,
-					ImageDigest: tt.fields.ImageDigest,
-				},
+				Image:       tt.fields.Image,
+				ImageDigest: tt.fields.ImageDigest,
 			}
 			if got := f.ImageWithDigest(); got != tt.want {
 				t.Errorf("ImageWithDigest() = %v, want %v", got, tt.want)
@@ -123,7 +121,7 @@ func Test_DerivedImage(t *testing.T) {
 
 			// write out the function
 			client := New()
-			err := client.Create(Function{Runtime: FunctionRuntimeSpec{Runtime: "go"}, Name: tt.fnName, Root: root})
+			err := client.Create(Function{Runtime: "go", Name: tt.fnName, Root: root})
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -108,7 +108,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 		return
 	}
 
-	function.Runtime.Envs, _, err = mergeEnvs(function.Runtime.Envs, config.EnvToUpdate, config.EnvToRemove)
+	function.Run.Envs, _, err = mergeEnvs(function.Run.Envs, config.EnvToUpdate, config.EnvToRemove)
 	if err != nil {
 		return
 	}
@@ -131,7 +131,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 	}
 
 	// If the Function does not yet have an image name and one was not provided on the command line
-	if function.Runtime.Image == "" && currentBuildType != "disabled" {
+	if function.Image == "" && currentBuildType != "disabled" {
 		//  AND a --registry was not provided, then we need to
 		// prompt for a registry from which we can derive an image name.
 		if config.Registry == "" {
@@ -150,7 +150,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 
 		// We have the registry, so let's use it to derive the Function image name
 		config.Image = deriveImage(config.Image, config.Registry, config.Path)
-		function.Runtime.Image = config.Image
+		function.Image = config.Image
 	}
 
 	// All set, let's write changes in the config to the disk
@@ -161,7 +161,7 @@ func runDeploy(cmd *cobra.Command, _ []string, newClient ClientFactory) (err err
 
 	// Default config namespace is the function's namespace
 	if config.Namespace == "" {
-		config.Namespace = function.Runtime.Namespace
+		config.Namespace = function.Run.Namespace
 	}
 
 	// if registry was not changed via command line flag meaning it's empty
@@ -465,7 +465,7 @@ func (c deployConfig) Prompt() (deployConfig, error) {
 // ErrInvalidBuildType indicates that the passed build type was invalid.
 type ErrInvalidBuildType error
 
-// ValidateBuildType validatest that the input Build type is valid for deploy command
+// ValidateBuildType validates that the input Build type is valid for deploy command
 func validateBuildType(buildType string) error {
 	if errs := fn.ValidateBuildType(buildType, false, true); len(errs) > 0 {
 		return ErrInvalidBuildType(errors.New(strings.Join(errs, "")))

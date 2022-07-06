@@ -103,7 +103,7 @@ func (b *Builder) Build(ctx context.Context, f fn.Function) (err error) {
 	// Build Config
 	cfg := &api.Config{}
 	cfg.Quiet = !b.verbose
-	cfg.Tag = f.Runtime.Image
+	cfg.Tag = f.Image
 	cfg.Source = &git.URL{URL: url.URL{Path: f.Root}, Type: git.URLTypeLocal}
 	cfg.BuilderImage = builderImage
 	cfg.BuilderPullPolicy = api.DefaultBuilderPullPolicy
@@ -249,7 +249,7 @@ func (b *Builder) Build(ctx context.Context, f fn.Function) (err error) {
 	}()
 
 	opts := types.ImageBuildOptions{
-		Tags: []string{f.Runtime.Image},
+		Tags: []string{f.Image},
 	}
 
 	resp, err := client.ImageBuild(ctx, pr, opts)
@@ -358,7 +358,7 @@ func s2iScriptURL(ctx context.Context, cli DockerClient, image string) (string, 
 // defined but an image exists neither in the static defaults nor in the
 // Function's Builders map.
 func builderImage(f fn.Function) (string, error) {
-	if f.Runtime.Runtime == "" {
+	if f.Runtime == "" {
 		return "", ErrRuntimeRequired
 	}
 
@@ -367,7 +367,7 @@ func builderImage(f fn.Function) (string, error) {
 		return v, nil
 	}
 
-	v, ok = DefaultBuilderImages[f.Runtime.Runtime]
+	v, ok = DefaultBuilderImages[f.Runtime]
 	if ok {
 		return v, nil
 	}

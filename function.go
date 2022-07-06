@@ -16,11 +16,11 @@ import (
 // FunctionFile is the file used for the serialized form of a Function.
 const FunctionFile = "func.yaml"
 
-// FunctionBuildSpec
-type FunctionBuildSpec struct {
-	// BuildType represents the specified way of building the fuction
+// BuildSpec
+type BuildSpec struct {
+	// BuildType represents the specified way of building the function
 	// ie. "local" or "git"
-	BuildType string `json:"build" jsonschema:"enum=local,enum=git"`
+	BuildType string `json:"type" jsonschema:"enum=local,enum=git"`
 
 	// Git stores information about remote git repository,
 	// in case build type "git" is being used
@@ -41,31 +41,10 @@ type FunctionBuildSpec struct {
 	BuildEnvs []Env `json:"buildEnvs"`
 }
 
-// FunctionRuntimeSpec
-type FunctionRuntimeSpec struct {
+// RunSpec
+type RunSpec struct {
 	// Namespace into which the Function is deployed on supported platforms.
 	Namespace string `json:"namespace"`
-
-	// Runtime is the language plus context.  nodejs|go|quarkus|springboot|rust etc.
-	Runtime string `json:"runtime"`
-
-	// Registry at which to store interstitial containers, in the form
-	// [registry]/[user].
-	Registry string `json:"registry"`
-
-	// Optional full OCI image tag in form:
-	//   [registry]/[namespace]/[name]:[tag]
-	// example:
-	//   quay.io/alice/my.function.name
-	// Registry is optional and is defaulted to DefaultRegistry
-	// example:
-	//   alice/my.function.name
-	// If Image is provided, it overrides the default of concatenating
-	// "Registry+Name:latest" to derive the Image.
-	Image string `json:"image"`
-
-	// SHA256 hash of the latest image that has been built
-	ImageDigest string `json:"imageDigest"`
 
 	// List of volumes to be mounted to the function
 	Volumes []Volume `json:"volumes"`
@@ -108,14 +87,36 @@ type Function struct {
 	// fully "Created" (aka initialized)
 	Created time.Time `json:"created"`
 
+	// Runtime is the language plus context.  nodejs|go|quarkus|springboot|rust|python etc.
+	Runtime string `json:"runtime"`
+
+	// Registry at which to store interstitial containers, in the form
+	// [registry]/[user].
+	Registry string `json:"registry"`
+
+	// Optional full OCI image tag in form:
+	//   [registry]/[namespace]/[name]:[tag]
+	// example:
+	//   quay.io/alice/my.function.name
+	// Registry is optional and is defaulted to DefaultRegistry
+	// example:
+	//   alice/my.function.name
+	// If Image is provided, it overrides the default of concatenating
+	// "Registry+Name:latest" to derive the Image.
+	Image string `json:"image"`
+
+	// SHA256 hash of the latest image that has been built
+	ImageDigest string `json:"imageDigest"`
+
 	// Invocation defines hints for use when invoking this function.
 	// See Client.Invoke for usage.
 	Invocation Invocation `json:"invocation,omitempty"`
 
-	//FunctionRuntimeSpec define the runtime properties for a function
-	Build FunctionBuildSpec `json:"build"`
-	//FunctionRuntimeSpec define the runtime properties for a function
-	Runtime FunctionRuntimeSpec `json:"run"`
+	//BuildSpec define the build properties for a function
+	Build BuildSpec `json:"build"`
+
+	//RunSpec define the runtime properties for a function
+	Run RunSpec `json:"run"`
 }
 
 // HealthEndpoints specify the liveness and readiness endpoints for a Runtime
@@ -190,7 +191,7 @@ func (f Function) Validate() error {
 	if f.Name == "" {
 		return errors.New("function name is required")
 	}
-	if f.Runtime.Runtime == "" {
+	if f.Runtime == "" {
 		return errors.New("function language runtime is required")
 	}
 	if f.Root == "" {
@@ -205,11 +206,11 @@ func (f Function) Validate() error {
 
 	var ctr int
 	errs := [][]string{
-		validateVolumes(f.Runtime.Volumes),
+		validateVolumes(f.Run.Volumes),
 		ValidateBuildEnvs(f.Build.BuildEnvs),
-		ValidateEnvs(f.Runtime.Envs),
-		validateOptions(f.Runtime.Options),
-		ValidateLabels(f.Runtime.Labels),
+		ValidateEnvs(f.Run.Envs),
+		validateOptions(f.Run.Options),
+		ValidateLabels(f.Run.Labels),
 		ValidateBuildType(f.Build.BuildType, true, false),
 		validateGit(f.Build.Git, mandatoryGitOption),
 	}
@@ -328,7 +329,7 @@ func (f Function) HasImage() bool {
 	// If Image (the override) and ImageDigest (the most recent build stamp) are
 	// both empty, the Function is considered unbuilt.
 	// TODO: upgrade to a "build complete" timestamp.
-	return f.Runtime.Image != "" || f.Runtime.ImageDigest != ""
+	return f.Image != "" || f.ImageDigest != ""
 }
 
 // ImageWithDigest returns the full reference to the image including SHA256 Digest.
@@ -337,18 +338,18 @@ func (f Function) HasImage() bool {
 // git tree on every build.
 func (f Function) ImageWithDigest() string {
 	// Return image, if Digest is empty
-	if f.Runtime.ImageDigest == "" {
-		return f.Runtime.Image
+	if f.ImageDigest == "" {
+		return f.Image
 	}
 
-	lastSlashIdx := strings.LastIndexAny(f.Runtime.Image, "/")
-	imageAsBytes := []byte(f.Runtime.Image)
+	lastSlashIdx := strings.LastIndexAny(f.Image, "/")
+	imageAsBytes := []byte(f.Image)
 
 	part1 := string(imageAsBytes[:lastSlashIdx+1])
 	part2 := string(imageAsBytes[lastSlashIdx+1:])
 
 	// Remove tag from the image name and append SHA256 hash instead
-	return part1 + strings.Split(part2, ":")[0] + "@" + f.Runtime.ImageDigest
+	return part1 + strings.Split(part2, ":")[0] + "@" + f.ImageDigest
 }
 
 // DerivedImage returns the derived image name (OCI container tag) of the
@@ -377,8 +378,8 @@ func DerivedImage(root, registry string) (image string, err error) {
 
 	// If the Function has already had image populated
 	// and a new registry hasn't been provided, use this pre-calculated value.
-	if f.Runtime.Image != "" && f.Runtime.Registry == registry {
-		image = f.Runtime.Image
+	if f.Image != "" && f.Registry == registry {
+		image = f.Image
 		return
 	}
 

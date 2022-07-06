@@ -110,7 +110,7 @@ func migrateToCreationStamp(f Function, m migration) (Function, error) {
 	// Yes, it's a little gnarly, but bootstrapping into the lovelieness of a
 	// versioned/migrated system takes cleaning up the trash.
 	if f.Created.IsZero() { // If there is no create stamp
-		if f.Name != "" && f.Runtime.Runtime != "" { // and it appears to be an old Function
+		if f.Name != "" && f.Runtime != "" { // and it appears to be an old Function
 			f.Created = time.Now() // Migrate it to having a timestamp.
 		}
 	}

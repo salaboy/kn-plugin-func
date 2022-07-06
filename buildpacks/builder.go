@@ -92,7 +92,7 @@ func (b *Builder) Build(ctx context.Context, f fn.Function) (err error) {
 	// Pack build options
 	opts := pack.BuildOptions{
 		AppPath:        f.Root,
-		Image:          f.Runtime.Image,
+		Image:          f.Image,
 		LifecycleImage: "quay.io/boson/lifecycle:0.13.2",
 		Builder:        image,
 		Buildpacks:     f.Build.Buildpacks,
@@ -178,7 +178,7 @@ func newImpl(ctx context.Context, cli client.CommonAPIClient, dockerHost string,
 // package's buildpacks.Builder.Build.  Instead, they must transmit information
 // to the cluster using a Pipeline definition.
 func BuilderImage(f fn.Function) (string, error) {
-	if f.Runtime.Runtime == "" {
+	if f.Runtime == "" {
 		return "", ErrRuntimeRequired{}
 	}
 
@@ -187,12 +187,12 @@ func BuilderImage(f fn.Function) (string, error) {
 		return v, nil
 	}
 
-	v, ok = DefaultBuilderImages[f.Runtime.Runtime]
+	v, ok = DefaultBuilderImages[f.Runtime]
 	if ok {
 		return v, nil
 	}
 
-	return "", ErrRuntimeNotSupported{f.Runtime.Runtime}
+	return "", ErrRuntimeNotSupported{f.Runtime}
 }
 
 // podmanPreV330 returns if the daemon is podman pre v330 or errors trying.

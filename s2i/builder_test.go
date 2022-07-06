@@ -45,7 +45,7 @@ func Test_ErrRuntimeRequired(t *testing.T) {
 // runtime is not yet supported yields an ErrRuntimeNotSupported
 func Test_ErrRuntimeNotSupported(t *testing.T) {
 	b := s2i.NewBuilder()
-	err := b.Build(context.Background(), fn.Function{Runtime: fn.FunctionRuntimeSpec{Runtime: "unsupported"}})
+	err := b.Build(context.Background(), fn.Function{Runtime: "unsupported"})
 
 	if !errors.Is(err, s2i.ErrRuntimeNotSupported) {
 		t.Fatal("expected ErrRuntimeNotSupported not received")
@@ -56,10 +56,10 @@ func Test_ErrRuntimeNotSupported(t *testing.T) {
 // define a Builder Image will default.
 func Test_ImageDefault(t *testing.T) {
 	var (
-		i = &mockImpl{}                                                   // mock underlying s2i implementation
-		c = mockDocker{}                                                  // mock docker client
-		b = s2i.NewBuilder(s2i.WithImpl(i), s2i.WithDockerClient(c))      // Func S2I Builder logic
-		f = fn.Function{Runtime: fn.FunctionRuntimeSpec{Runtime: "node"}} // Function with no builder image set
+		i = &mockImpl{}                                              // mock underlying s2i implementation
+		c = mockDocker{}                                             // mock docker client
+		b = s2i.NewBuilder(s2i.WithImpl(i), s2i.WithDockerClient(c)) // Func S2I Builder logic
+		f = fn.Function{Runtime: "node"}                             // Function with no builder image set
 	)
 
 	// An implementation of the underlying S2I implementation which verifies
@@ -87,8 +87,8 @@ func Test_BuilderImageConfigurable(t *testing.T) {
 		c = mockDocker{}                                             // mock docker client
 		b = s2i.NewBuilder(s2i.WithImpl(i), s2i.WithDockerClient(c)) // Func S2I Builder logic
 		f = fn.Function{                                             // Function with a builder image set
-			Runtime: fn.FunctionRuntimeSpec{Runtime: "node"},
-			Build: fn.FunctionBuildSpec{BuilderImages: map[string]string{
+			Runtime: "node",
+			Build: fn.BuildSpec{BuilderImages: map[string]string{
 				"s2i": "example.com/user/builder-image",
 			}},
 		}
@@ -123,7 +123,7 @@ func Test_BuilderVerbose(t *testing.T) {
 				}
 				return &api.Result{Messages: []string{"message"}}, nil
 			}}
-		if err := s2i.NewBuilder(s2i.WithVerbose(verbose), s2i.WithImpl(i), s2i.WithDockerClient(c)).Build(context.Background(), fn.Function{Runtime: fn.FunctionRuntimeSpec{Runtime: "node"}}); err != nil {
+		if err := s2i.NewBuilder(s2i.WithVerbose(verbose), s2i.WithImpl(i), s2i.WithDockerClient(c)).Build(context.Background(), fn.Function{Runtime: "node"}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -140,8 +140,8 @@ func Test_BuildEnvs(t *testing.T) {
 		envName  = "NAME"
 		envValue = "{{ env:INTERPOLATE_ME }}"
 		f        = fn.Function{
-			Runtime: fn.FunctionRuntimeSpec{Runtime: "node"},
-			Build:   fn.FunctionBuildSpec{BuildEnvs: []fn.Env{{Name: &envName, Value: &envValue}}},
+			Runtime: "node",
+			Build:   fn.BuildSpec{BuildEnvs: []fn.Env{{Name: &envName, Value: &envValue}}},
 		}
 		i = &mockImpl{}
 		c = mockDocker{}
@@ -218,8 +218,8 @@ func TestS2IScriptURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := fn.Function{
-				Runtime: fn.FunctionRuntimeSpec{Runtime: "node"},
-				Build: fn.FunctionBuildSpec{BuilderImages: map[string]string{
+				Runtime: "node",
+				Build: fn.BuildSpec{BuilderImages: map[string]string{
 					"s2i": tt.builderImage,
 				}},
 			}
@@ -317,7 +317,7 @@ func TestBuildContextUpload(t *testing.T) {
 	}
 
 	f := fn.Function{
-		Runtime: fn.FunctionRuntimeSpec{Runtime: "node"},
+		Runtime: "node",
 	}
 	b := s2i.NewBuilder(s2i.WithImpl(impl), s2i.WithDockerClient(cli))
 	err := b.Build(context.Background(), f)
@@ -341,7 +341,7 @@ func TestBuildFail(t *testing.T) {
 		},
 	}
 	b := s2i.NewBuilder(s2i.WithImpl(impl), s2i.WithDockerClient(cli))
-	err := b.Build(context.Background(), fn.Function{Runtime: fn.FunctionRuntimeSpec{Runtime: "node"}})
+	err := b.Build(context.Background(), fn.Function{Runtime: "node"})
 	if err == nil || !strings.Contains(err.Error(), "Error: this is expected") {
 		t.Error("didn't get expected error")
 	}

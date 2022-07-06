@@ -627,7 +627,7 @@ func (c *Client) Build(ctx context.Context, path string) (err error) {
 	}
 
 	// Derive Image from the path (precedence is given to extant config)
-	if f.Runtime.Image, err = DerivedImage(path, c.registry); err != nil {
+	if f.Image, err = DerivedImage(path, c.registry); err != nil {
 		return
 	}
 
@@ -648,9 +648,9 @@ func (c *Client) Build(ctx context.Context, path string) (err error) {
 
 	// TODO: create a status structure and return it here for optional
 	// use by the cli for user echo (rather than rely on verbose mode here)
-	message := fmt.Sprintf("🙌 Function image built: %v", f.Runtime.Image)
+	message := fmt.Sprintf("🙌 Function image built: %v", f.Image)
 	if runtime.GOOS == "windows" {
-		message = fmt.Sprintf("Function image built: %v", f.Runtime.Image)
+		message = fmt.Sprintf("Function image built: %v", f.Image)
 	}
 	c.progressListener.Increment(message)
 	return
@@ -904,7 +904,7 @@ func (c *Client) Push(ctx context.Context, path string) (err error) {
 	}
 
 	// Record the Image Digest pushed.
-	f.Runtime.ImageDigest = imageDigest
+	f.ImageDigest = imageDigest
 	return f.Write()
 }
 

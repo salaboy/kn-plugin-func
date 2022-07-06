@@ -111,7 +111,7 @@ func TestDaemonPush(t *testing.T) {
 	)
 
 	f := fn.Function{
-		Runtime: fn.FunctionRuntimeSpec{Image: functionImageLocal},
+		Image: functionImageLocal,
 	}
 
 	digest, err := pusher.Push(ctx, f)
@@ -194,7 +194,7 @@ func TestNonDaemonPush(t *testing.T) {
 	)
 
 	f := fn.Function{
-		Runtime: fn.FunctionRuntimeSpec{Image: functionImageRemote},
+		Image: functionImageRemote,
 	}
 
 	actualDigest, err := pusher.Push(ctx, f)
@@ -202,7 +202,7 @@ func TestNonDaemonPush(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(imagesPassedToMock, []string{f.Runtime.Image}) {
+	if !reflect.DeepEqual(imagesPassedToMock, []string{f.Image}) {
 		t.Errorf("Bad image name passed to the Docker API Client: %q.", imagesPassedToMock)
 	}
 
