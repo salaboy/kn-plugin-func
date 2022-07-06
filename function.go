@@ -20,11 +20,11 @@ const FunctionFile = "func.yaml"
 type BuildSpec struct {
 	// BuildType represents the specified way of building the function
 	// ie. "local" or "git"
-	BuildType string `json:"type" jsonschema:"enum=local,enum=git"`
+	BuildType string `yaml:"type" jsonschema:"enum=local,enum=git"`
 
 	// Git stores information about remote git repository,
 	// in case build type "git" is being used
-	Git Git `json:"git"`
+	Git Git `yaml:"git"`
 
 	// BuilderImages define optional explicit builder images to use by
 	// builder implementations in leau of the in-code defaults.  They key
@@ -32,35 +32,35 @@ type BuildSpec struct {
 	// builderImages:
 	//   pack: example.com/user/my-pack-node-builder
 	//   s2i: example.com/user/my-s2i-node-builder
-	BuilderImages map[string]string `json:"builderImages,omitempty"`
+	BuilderImages map[string]string `yaml:"builderImages,omitempty"`
 
 	// Optional list of buildpacks to use when building the function
-	Buildpacks []string `json:"buildpacks"`
+	Buildpacks []string `yaml:"buildpacks"`
 
 	// Build Env variables to be set
-	BuildEnvs []Env `json:"buildEnvs"`
+	BuildEnvs []Env `yaml:"buildEnvs"`
 }
 
 // RunSpec
 type RunSpec struct {
 	// Namespace into which the Function is deployed on supported platforms.
-	Namespace string `json:"namespace"`
+	Namespace string `yaml:"namespace"`
 
 	// List of volumes to be mounted to the function
-	Volumes []Volume `json:"volumes"`
+	Volumes []Volume `yaml:"volumes"`
 
 	// Env variables to be set
-	Envs []Env `json:"envs"`
+	Envs []Env `yaml:"envs"`
 
 	// Map containing user-supplied annotations
 	// Example: { "division": "finance" }
-	Annotations map[string]string `json:"annotations"`
+	Annotations map[string]string `yaml:"annotations"`
 
 	// Options to be set on deployed function (scaling, etc.)
-	Options Options `json:"options"`
+	Options Options `yaml:"options"`
 
 	// Map of user-supplied labels
-	Labels []Label `json:"labels"`
+	Labels []Label `yaml:"labels"`
 
 	// Health endpoints specified by the language pack
 	HealthEndpoints HealthEndpoints `json:"healthEndpoints"`
@@ -70,29 +70,29 @@ type Function struct {
 	// Version at which this function is known to be compatible.
 	// More specifically, it is the highest migration which has been applied.
 	// For details see the `.Migrated()` and `.Migrate()` methods.
-	Version string `json:"version"` // semver format
+	Version string `yaml:"version"` // semver format
 
 	// Root on disk at which to find/create source and config files.
-	Root string `json:"-"`
+	Root string `yaml:"-"`
 
 	// Name of the Function.  If not provided, path derivation is attempted when
 	// required (such as for initialization).
-	Name string `json:"name" jsonschema:"pattern=^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"`
+	Name string `yaml:"name" jsonschema:"pattern=^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"`
 
 	// Template for the Function.
-	Template string `json:"-"`
+	Template string `yaml:"-"`
 
 	// Created time is the moment that creation was successfully completed
 	// according to the client which is in charge of what constitutes being
 	// fully "Created" (aka initialized)
-	Created time.Time `json:"created"`
+	Created time.Time `yaml:"created"`
 
 	// Runtime is the language plus context.  nodejs|go|quarkus|springboot|rust|python etc.
-	Runtime string `json:"runtime"`
+	Runtime string `yaml:"runtime"`
 
 	// Registry at which to store interstitial containers, in the form
 	// [registry]/[user].
-	Registry string `json:"registry"`
+	Registry string `yaml:"registry"`
 
 	// Optional full OCI image tag in form:
 	//   [registry]/[namespace]/[name]:[tag]
@@ -103,32 +103,32 @@ type Function struct {
 	//   alice/my.function.name
 	// If Image is provided, it overrides the default of concatenating
 	// "Registry+Name:latest" to derive the Image.
-	Image string `json:"image"`
+	Image string `yaml:"image"`
 
 	// SHA256 hash of the latest image that has been built
-	ImageDigest string `json:"imageDigest"`
+	ImageDigest string `yaml:"imageDigest"`
 
 	// Invocation defines hints for use when invoking this function.
 	// See Client.Invoke for usage.
-	Invocation Invocation `json:"invocation,omitempty"`
+	Invocation Invocation `yaml:"invocation,omitempty"`
 
 	//BuildSpec define the build properties for a function
-	Build BuildSpec `json:"build"`
+	Build BuildSpec `yaml:"build"`
 
 	//RunSpec define the runtime properties for a function
-	Run RunSpec `json:"run"`
+	Run RunSpec `yaml:"run"`
 }
 
 // HealthEndpoints specify the liveness and readiness endpoints for a Runtime
 type HealthEndpoints struct {
-	Liveness  string `json:"liveness,omitempty"`
-	Readiness string `json:"readiness,omitempty"`
+	Liveness  string `yaml:"liveness,omitempty"`
+	Readiness string `yaml:"readiness,omitempty"`
 }
 
 // BuildConfig defines builders and buildpacks
 type BuildConfig struct {
-	Buildpacks    []string          `json:"buildpacks,omitempty"`
-	BuilderImages map[string]string `json:"builderImages,omitempty"`
+	Buildpacks    []string          `yaml:"buildpacks,omitempty"`
+	BuilderImages map[string]string `yaml:"builderImages,omitempty"`
 }
 
 // Invocation defines hints on how to accomplish a Function invocation.
@@ -136,7 +136,7 @@ type Invocation struct {
 	// Format indicates the expected format of the invocation.  Either 'http'
 	// (a basic HTTP POST of standard form fields) or 'cloudevent'
 	// (a CloudEvents v2 formatted http request).
-	Format string `json:"format,omitempty"`
+	Format string `yaml:"format,omitempty"`
 
 	// Protocol Note:
 	// Protocol is currently always HTTP.  Method etc. determined by the single,
