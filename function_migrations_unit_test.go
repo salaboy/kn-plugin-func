@@ -124,6 +124,45 @@ func TestMigrateToBuilderImagesCustom(t *testing.T) {
 
 }
 
+// TestMigrateTo100 ensures that the migration to 1.0.0 format from the
+//   previous Function structure works
+func TestMigrateTo100(t *testing.T) {
+
+	root := "testdata/migrations/v1.0.0"
+	expectedBuildType := "local" // set in testdata func.yaml
+	expectedGit := Git{}
+	expectedNamespace := ""
+	var expectedEnvs []Env
+	var expectedVolumes []Volume
+
+	f, err := NewFunction(root)
+	if err != nil {
+		t.Error(err)
+		t.Fatal(f)
+	}
+
+	if f.Build.BuildType != expectedBuildType {
+		t.Fatalf("migrated Function expected BuildType '%v', got '%v'", expectedBuildType, f.Build.BuildType)
+	}
+
+	if f.Build.Git != expectedGit {
+		t.Fatalf("migrated Function expected Git '%v', got '%v'", expectedGit, f.Build.Git)
+	}
+
+	if f.Run.Namespace != expectedNamespace {
+		t.Fatalf("migrated Function expected Namespace '%v', got '%v'", expectedNamespace, f.Run.Namespace)
+	}
+
+	if len(f.Run.Envs) != len(expectedEnvs) {
+		t.Fatalf("migrated Function expected Run Envs '%v', got '%v'", len(expectedEnvs), len(f.Run.Envs))
+	}
+
+	if len(f.Run.Volumes) != len(expectedVolumes) {
+		t.Fatalf("migrated Function expected Run Volumes '%v', got '%v'", len(expectedEnvs), len(f.Run.Envs))
+	}
+
+}
+
 func latestMigrationVersion() string {
 	return migrations[len(migrations)-1].version
 }
