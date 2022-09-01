@@ -113,10 +113,10 @@ type Function struct {
 	Invocation Invocation `yaml:"invocation,omitempty"`
 
 	//BuildSpec define the build properties for a function
-	Build BuildSpec `yaml:"buildSpec"` //Renamed to buildSpec to avoid marshalling issues
+	Build BuildSpec `yaml:"build"` //Renamed to buildSpec to avoid marshalling issues
 
 	//RunSpec define the runtime properties for a function
-	Run RunSpec `yaml:"runSpec"` //Renamed to runSpec to avoid marshalling issues
+	Run RunSpec `yaml:"run"` //Renamed to runSpec to avoid marshalling issues
 }
 
 // HealthEndpoints specify the liveness and readiness endpoints for a Runtime
@@ -357,7 +357,9 @@ func (f Function) ImageWithDigest() string {
 // the image has to be calculated (derived).
 // The following are equivalent due to the use of DefaultRegistry:
 // registry:  docker.io/myname
-//            myname
+//
+//	myname
+//
 // A full image name consists of registry, image name and tag.
 // in form [registry]/[image-name]:[tag]
 // example docker.io/alice/my.example.func:latest

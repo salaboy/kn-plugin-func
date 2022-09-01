@@ -222,7 +222,7 @@ type migrateToBuilderImages_previousFunction struct {
 type migrateTo100_previousFunction struct {
 	// New Build Section
 
-	// BuildType represents the specified way of building the fuction
+	// BuildType represents the specified way of building the function
 	// ie. "local" or "git"
 	BuildType string `yaml:"build" jsonschema:"enum=local,enum=git"`
 
